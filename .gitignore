@@ -1,0 +1,28 @@
+# Dependencies
+backend/vendor/
+frontend/node_modules/
+
+# Environment files
+backend/.env
+frontend/.env
+.env
+
+# Laravel cache & logs
+backend/storage/logs/*.log
+backend/bootstrap/cache/*.php
+
+# Build output
+frontend/dist/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.user
+
+# Composer binary (already tracked, skip re-adding)
+composer.exe
