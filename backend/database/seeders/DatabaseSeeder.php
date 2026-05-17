@@ -2,89 +2,85 @@
 
 namespace Database\Seeders;
 
-use App\Models\Branch;
 use App\Models\Department;
-use App\Models\Employee;
-use App\Models\Permission;
 use App\Models\Position;
 use App\Models\Role;
-use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\TelegramDestination;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        $adminRole = Role::firstOrCreate(['slug' => 'admin'], ['name' => 'Admin']);
-        $managerRole = Role::firstOrCreate(['slug' => 'manager'], ['name' => 'Manager']);
-        $employeeRole = Role::firstOrCreate(['slug' => 'employee'], ['name' => 'Employee']);
+        $departments = [
+            ['code' => 'ADMIN', 'name' => 'Administration', 'description' => 'System administration and office operations.'],
+            ['code' => 'HR', 'name' => 'Human Resources', 'description' => 'Employee records, attendance, and staff support.'],
+            ['code' => 'SALES', 'name' => 'Sales', 'description' => 'Indoor and outdoor sales team.'],
+            ['code' => 'WH', 'name' => 'Warehouse', 'description' => 'Stock handling and warehouse operations.'],
+            ['code' => 'FIN', 'name' => 'Finance', 'description' => 'Accounting, payroll, and finance reporting.'],
+            ['code' => 'DEL', 'name' => 'Delivery', 'description' => 'Drivers and delivery operations.'],
+        ];
 
-        collect([
-            'employees.manage', 'attendance.manage', 'attendance.self', 'reports.view',
-            'reports.submit', 'locations.track', 'notifications.view',
-        ])->each(function ($slug) use ($adminRole, $managerRole, $employeeRole) {
-            $permission = Permission::firstOrCreate(
-                ['slug' => $slug],
-                [
-                    'name' => str($slug)->replace('.', ' ')->title(),
-                    'group' => str($slug)->before('.'),
-                ]
+        foreach ($departments as $department) {
+            Department::updateOrCreate(
+                ['code' => $department['code']],
+                [...$department, 'status' => 'active'],
             );
+        }
 
-            $adminRole->permissions()->syncWithoutDetaching($permission);
-            if (! str($slug)->contains('employees.manage')) {
-                $managerRole->permissions()->syncWithoutDetaching($permission);
-            }
-            if (str($slug)->contains('self') || str($slug)->contains('submit')) {
-                $employeeRole->permissions()->syncWithoutDetaching($permission);
-            }
-        });
+        $departmentIds = Department::pluck('id', 'code');
 
-        $department = Department::firstOrCreate(['code' => 'SALES'], ['name' => 'Outdoor Sales']);
-        $position = Position::firstOrCreate(
-            ['code' => 'SALES-EXEC'],
-            ['department_id' => $department->id, 'name' => 'Sales Executive']
-        );
-        $branch = Branch::firstOrCreate(
-            ['code' => 'HQ'],
-            [
-                'name' => 'Head Office',
-                'address' => 'Bangkok wholesale cosmetics office',
-                'latitude' => 13.7563,
-                'longitude' => 100.5018,
-                'attendance_radius_meters' => 100,
-            ]
-        );
+        $positions = [
+            ['department' => 'ADMIN', 'code' => 'SUPER_ADMIN', 'name' => 'Super Admin'],
+            ['department' => 'ADMIN', 'code' => 'ADMIN', 'name' => 'Admin'],
+            ['department' => 'HR', 'code' => 'HR_MANAGER', 'name' => 'HR Manager'],
+            ['department' => 'SALES', 'code' => 'SALES_MANAGER', 'name' => 'Sales Manager'],
+            ['department' => 'SALES', 'code' => 'OUTDOOR_SALES', 'name' => 'Outdoor Sales'],
+            ['department' => 'WH', 'code' => 'WAREHOUSE_STAFF', 'name' => 'Warehouse Staff'],
+            ['department' => 'FIN', 'code' => 'ACCOUNTANT', 'name' => 'Accountant'],
+            ['department' => 'DEL', 'code' => 'DRIVER', 'name' => 'Driver'],
+            ['department' => 'ADMIN', 'code' => 'OFFICE_STAFF', 'name' => 'Office Staff'],
+        ];
 
-        $adminEmployee = Employee::firstOrCreate(
-            ['employee_code' => 'EMP-0001'],
-            [
-                'department_id' => $department->id,
-                'position_id' => $position->id,
-                'branch_id' => $branch->id,
-                'first_name' => 'Admin',
-                'last_name' => 'User',
-                'employment_type' => 'full_time',
-                'status' => 'active',
-            ]
-        );
+        foreach ($positions as $position) {
+            Position::updateOrCreate(
+                ['code' => $position['code']],
+                [
+                    'department_id' => $departmentIds[$position['department']] ?? null,
+                    'name' => $position['name'],
+                    'status' => 'active',
+                ],
+            );
+        }
 
-        User::updateOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-                'role_id' => $adminRole->id,
-                'employee_id' => $adminEmployee->id,
-                'status' => 'active',
-            ]
-        );
+        foreach ([
+            ['slug' => 'super_admin', 'name' => 'Super Admin', 'description' => 'Full system owner with unrestricted access.'],
+            ['slug' => 'admin', 'name' => 'Admin', 'description' => 'System management access.'],
+            ['slug' => 'hr_manager', 'name' => 'HR Manager', 'description' => 'Employee and attendance management.'],
+            ['slug' => 'sales_manager', 'name' => 'Sales Manager', 'description' => 'Outdoor sales team management.'],
+            ['slug' => 'accountant', 'name' => 'Accountant', 'description' => 'Financial and payroll access.'],
+            ['slug' => 'outdoor_sales', 'name' => 'Outdoor Sales', 'description' => 'Field sales employee.'],
+            ['slug' => 'office_staff', 'name' => 'Office Staff', 'description' => 'Office employee.'],
+            ['slug' => 'warehouse_staff', 'name' => 'Warehouse Staff', 'description' => 'Warehouse employee.'],
+            ['slug' => 'driver', 'name' => 'Driver', 'description' => 'Delivery employee.'],
+        ] as $role) {
+            Role::updateOrCreate(['slug' => $role['slug']], $role);
+        }
+
+        foreach ([
+            ['event_key' => 'daily_attendance', 'name' => 'Daily Attendance Group'],
+            ['event_key' => 'permission_request', 'name' => 'Permission Requests Group'],
+            ['event_key' => 'late_attendance', 'name' => 'Late Attendance Topic'],
+            ['event_key' => 'outdoor_visit', 'name' => 'Outdoor Visit Topic'],
+        ] as $destination) {
+            TelegramDestination::updateOrCreate(
+                ['event_key' => $destination['event_key'], 'name' => $destination['name']],
+                [
+                    'chat_id' => '',
+                    'message_thread_id' => null,
+                    'enabled' => false,
+                ],
+            );
+        }
     }
 }

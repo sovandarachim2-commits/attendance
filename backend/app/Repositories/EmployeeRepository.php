@@ -10,6 +10,7 @@ class EmployeeRepository
     {
         return Employee::query()
             ->with(['department', 'position', 'branch', 'user.role'])
+            ->when($filters['employee_id'] ?? null, fn ($query, $id) => $query->where('id', $id))
             ->when($filters['search'] ?? null, function ($query, $search) {
                 $query->where('employee_code', 'like', "%{$search}%")
                     ->orWhere('first_name', 'like', "%{$search}%")

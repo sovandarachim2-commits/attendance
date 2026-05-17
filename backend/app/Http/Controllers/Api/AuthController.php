@@ -13,17 +13,20 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
+        $request->validate([
+            'username' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
+        $username = $request->input('username');
+
         $user = User::with(['role.permissions', 'employee.department', 'employee.position', 'employee.branch'])
-            ->where('email', $credentials['email'])
+            ->where('name', $username)
+            ->orWhere('email', $username)
             ->first();
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password) || $user->status !== 'active') {
-            throw ValidationException::withMessages(['email' => 'Invalid credentials or inactive account.']);
+        if (! $user || ! Hash::check($request->input('password'), $user->password) || $user->status !== 'active') {
+            throw ValidationException::withMessages(['username' => 'Invalid username or password.']);
         }
 
         $user->forceFill(['last_login_at' => now()])->save();

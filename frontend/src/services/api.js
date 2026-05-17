@@ -35,3 +35,11 @@ export const attendanceService = {
 export const dashboardService = {
   overview: () => api.get('/dashboard').then((response) => response.data),
 }
+
+export const permissionRequestService = {
+  list: () => api.get('/permission-requests').then((response) => response.data.data || []),
+  create: (payload) => api.post('/permission-requests', payload).then((response) => response.data),
+  update: (id, payload) => api.patch(`/permission-requests/${id}`, payload).then((response) => response.data),
+  updateStatus: (id, payload) => api.patch(`/permission-requests/${id}/status`, payload).then((response) => response.data),
+  remove: (id) => api.delete(`/permission-requests/${id}`),
+}

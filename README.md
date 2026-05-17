@@ -93,43 +93,35 @@ http://127.0.0.1:8000/api
 
 ## Login
 
-Seeded admin account:
+Create users through **Employees** (with login) or set optional super admin in `.env`:
 
 ```text
-Email: admin@example.com
-Password: password
+SUPER_ADMIN_EMAIL=your@email.com
+SUPER_ADMIN_PASSWORD=your-secure-password
 ```
 
-Use real accounts from the `users` table after you add employees and users.
+Then run `php artisan migrate` (or `migrate:fresh` on a new database). No demo accounts are seeded by default.
 
-## Env Files
-
-Keep env files inside their own app folders:
+## Env File (one file for backend + frontend)
 
 ```text
-backend/.env       Laravel backend config
-frontend/.env      React frontend config, optional
+C:\xampp\htdocs\Attadance\.env
 ```
 
-Do not move `backend/.env` to the root folder. Laravel reads `.env` from:
-
-```text
-C:\xampp\htdocs\Attadance\backend\.env
-```
-
-To create frontend env:
+Create from template:
 
 ```powershell
-cd C:\xampp\htdocs\Attadance\frontend
+cd C:\xampp\htdocs\Attadance
 copy .env.example .env
 ```
 
-Frontend values:
-
-```env
-VITE_API_URL=http://127.0.0.1:8000/api
-VITE_GOOGLE_MAPS_API_KEY=
-```
+- Laravel loads this file from the project root.
+- Vite reads `VITE_*` variables from the same file.
+- Leave `VITE_API_URL` empty in local dev so the phone can use `https://YOUR_PC_IP:5174` with the built-in API proxy.
+- For phone access, add your PC IP to `SANCTUM_STATEFUL_DOMAINS` (e.g. `192.168.1.10,192.168.1.10:5174`).
+- Run `.\scripts\setup-dev-https.ps1` so HTTPS certificate includes your LAN IP (required for some phones).
+- On phone use **`https://YOUR_PC_IP:5174`** (not `http://`). Phone and PC must be on the same Wi‑Fi.
+- Leave `VITE_API_URL` empty so the API goes through the Vite proxy (do not use `127.0.0.1` in `.env` for phone testing).
 
 ## Database Setup
 

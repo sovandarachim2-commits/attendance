@@ -2,17 +2,23 @@
 backend/vendor/
 frontend/node_modules/
 
-# Environment files
+# Environment (single file at project root)
+.env
 backend/.env
 frontend/.env
-.env
 
 # Laravel cache & logs
 backend/storage/logs/*.log
 backend/bootstrap/cache/*.php
+*.log
+*-server.log
+*-server.err.log
+mysql-start.log
+mysql-start.err.log
 
 # Build output
 frontend/dist/
+.vite-cache/
 
 # OS files
 .DS_Store
@@ -23,6 +29,9 @@ Thumbs.db
 .vscode/
 *.suo
 *.user
+
+# Claude Code memory
+.claude/
 
 # Composer binary (already tracked, skip re-adding)
 composer.exe

@@ -31,15 +31,20 @@ class AttendanceController extends Controller
 
     public function checkIn(Request $request)
     {
+        $photoRules = config('attendance.face_verification_enabled', false)
+            ? ['required', 'image', 'max:4096']
+            : ['nullable', 'image', 'max:4096'];
+
         $data = $request->validate([
             'type' => ['required', 'in:office,outdoor'],
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'accuracy' => ['nullable', 'numeric'],
             'speed' => ['nullable', 'numeric'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => $photoRules,
             'qr_code' => ['nullable', 'string', 'max:120'],
             'notes' => ['nullable', 'string', 'max:2000'],
+            'address' => ['nullable', 'string', 'max:2000'],
             'offline_sync_uuid' => ['nullable', 'uuid'],
         ]);
 
@@ -50,13 +55,18 @@ class AttendanceController extends Controller
 
     public function checkOut(Request $request)
     {
+        $photoRules = config('attendance.face_verification_enabled', false)
+            ? ['required', 'image', 'max:4096']
+            : ['nullable', 'image', 'max:4096'];
+
         $data = $request->validate([
             'latitude' => ['required', 'numeric', 'between:-90,90'],
             'longitude' => ['required', 'numeric', 'between:-180,180'],
             'accuracy' => ['nullable', 'numeric'],
             'speed' => ['nullable', 'numeric'],
-            'photo' => ['nullable', 'image', 'max:4096'],
+            'photo' => $photoRules,
             'notes' => ['nullable', 'string', 'max:2000'],
+            'address' => ['nullable', 'string', 'max:2000'],
         ]);
 
         $data['photo'] = $request->file('photo');
